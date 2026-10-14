@@ -22,6 +22,7 @@ generation gets longer, and the outputs are token-identical to plain greedy thro
 | Generation lengths | 32, 128, 256 new tokens |
 | Scope | 10 prompts × 3 lengths × 2 methods × 3 measured trials = 30 points, 180 measured records |
 | Protocol | 2 discarded warm-up trials per point, arms interleaved, medians and IQRs (never means) |
+| Output correctness | token-identical to the paired baseline in **90 / 90** assisted measured trials |
 | Runtime | ≈24 minutes of measurement on one T4, plus a one-time ~6.8 GB checkpoint download |
 
 Speedup is defined as `baseline latency / assisted-decoding latency`. **A value below 1.0× is a
@@ -201,11 +202,11 @@ python -m tinyturbo report --config configs/gpu_main.yaml   # CSV + figures 1-3
 python -m tinyturbo verify --config configs/gpu_main.yaml   # exit 0 if the records are usable
 ```
 
-This rewrites `results/benchmark_results.csv` (180 rows) and all three figures in `plots/`,
-and both come back byte-for-byte identical to the committed copies — the same argument in the
-same order, the same 180 rows, the same three PNGs. Move `results/calibration/` aside and
-figure 2 loses its cost-model lines and figure 3 disappears: that is the calibration guard
-working, not a failure.
+This rewrites `results/benchmark_results.csv` (180 rows) and all three figures in `plots/`. It
+must reproduce the committed files rather than approximate them: the same 180 rows in the same
+order, and figures whose sha256 matches the ones recorded in `docs/FINDINGS.md`. Move
+`results/calibration/` aside and figure 2 loses its cost-model lines and figure 3 disappears —
+that is the calibration guard working, not a failure.
 
 **Re-run the benchmark itself (needs a CUDA GPU).** Nothing here was measured on CPU; a CPU run
 of the same config would produce numbers that look like results and are not.
@@ -305,9 +306,9 @@ notebooks/       the hosted-GPU notebook
   one machine and one model pair, and it is not evidence that the model generalises.
 * **Coverage.** One prompt set (10 hand-written prompts of 8–369 tokens; the `S2-long-open`
   stratum was specified at 300–1000 tokens and tokenises to 174–188, so workload dependence is
-  tested over ten short prompts rather than a corpus), one method family, greedy decoding only, CC 7.5 only.
-  H1/H2/H7 are untested by scope, H5's magnitude is untestable from these prompts, and H8 needs
-  sm80+ hardware.
+  tested over ten short prompts rather than a corpus), one method family, greedy decoding only,
+  CC 7.5 only. H1/H2/H7 are untested by scope, H5's magnitude is untestable from these prompts,
+  and H8 needs sm80+ hardware.
 * `decode_ms` is derived from a separately measured prefill, so it is an upper bound on decode
   time rather than an exact decomposition — labelled as such in every record.
 
