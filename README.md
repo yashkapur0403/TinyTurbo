@@ -1,4 +1,4 @@
-# TinyTurbo — does a smaller model make a larger one generate faster?
+# TinyTurbo — Benchmarking Speculative Decoding for LLM Inference
 
 Can a smaller language model make a larger one generate text faster? TinyTurbo answers that by
 benchmarking speculative decoding against ordinary greedy generation on the same GPU, with the same
