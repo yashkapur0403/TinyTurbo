@@ -111,7 +111,7 @@ lookahead mid-generation. Recorded draft passes per target pass came out at 4.79
 |---|---|
 | Runtime | Python 3.13.15, PyTorch 2.11.0+cu130, Transformers 5.3.0, float16 with `sdpa`; bfloat16 is slow on compute capability 7.5 and FlashAttention-2 is unavailable there |
 | Per trial | 2 discarded warm-ups then 3 measured trials, arms interleaved so drift cannot masquerade as a treatment effect; ≈3.8 GB peak memory; medians and IQRs, never means |
-| Timing | `prefill_ms` is one pass over the prompt with an empty cache, `e2e_ms` is the timed `generate` call, `decode_ms_per_token = (e2e_ms − prefill_ms) / tokens_generated` |
+| Timing | `prefill_ms` is one pass over the prompt with an empty cache, `e2e_ms` is the timed `generate` call, `decode_ms_per_token = (e2e_ms − prefill_ms) / tokens_generated` — so an upper bound on decode time rather than an exact decomposition |
 
 **Calibration (Stage 0).** `tinyturbo calibrate` times three primitives in isolation — one target pass
 over a single token, one over γ+1 = 6 tokens, one assistant pass — with warm-ups discarded and 20
@@ -225,21 +225,17 @@ docs/              PLAN.md (the pre-registered plan) and FINDINGS.md (the full a
 
 ## Limitations
 
-* **One configuration is not a verdict on the method.** One GPU, one model pair, one session, γ = 5,
-  greedy only, compute capability 7.5 only.
+* **One machine, one configuration, and the cost model is scored on it.** One T4, one model pair,
+  γ = 5, greedy decoding only, compute capability 7.5 only, one session — so the model's agreement
+  with the sweep is not evidence that it generalises.
 * **Three measured trials per configuration is thin for adjacent points.** The IQR at 32 tokens (0.169)
   exceeds the gap between the 32- and 256-token medians (0.140): the trend across lengths is solid,
   individual configurations are not.
 * **The profiler evidence is a bounded window on a different image**, which is why `attributed_ms` and
   `unattributed_ms` are `null` and the ≈20 ms per-pass discrepancy with the calibration is unresolved.
-* **The cost model is scored, not validated** — its small residuals are a real test, but agreement on
-  one machine and one model pair is not evidence that it generalises.
 * **The prompt set is ten hand-written prompts, and its long-open stratum is shorter than designed.**
   Specified at 300–1000 tokens, it tokenises to 174–188, so workload dependence is tested over short
-  prompts and prefill dilution's magnitude is untestable here — recorded rather than repaired, since
-  the prompt set is an input to a run that already happened (`docs/FINDINGS.md` §7).
-* **`decode_ms` is derived** from a separately measured prefill, so it is an upper bound rather than an
-  exact decomposition.
+  prompts and prefill dilution's magnitude is untestable here (`docs/FINDINGS.md` §7).
 
 ---
 
