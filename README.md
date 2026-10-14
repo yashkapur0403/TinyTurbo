@@ -71,12 +71,16 @@ flowchart TD
     E --> F["Result: assisted was slower<br/>in all 30 configurations"]
 ```
 
-The draft-then-verify step repeats until the token budget is spent. This is the protocol every measured
-trial follows; the calibration and the bounded trace are **separate measurements taken outside it** and
-do not run during benchmark trials. Each trial records both models' forward-pass counts (via forward
-hooks), a synchronising wall-clock timing for prefill and the full `generate` call, CUDA memory
-high-water marks, and the generated token ids, compared with the paired baseline's to record whether
-the output sequence is identical.
+* The draft-then-verify step repeats until the token budget is spent — the protocol every measured trial
+  follows.
+* The calibration and the bounded trace are **separate measurements taken outside it** and do not run
+  during benchmark trials.
+* Each trial records:
+  * both models' forward-pass counts (via forward hooks);
+  * a synchronising wall-clock timing for prefill and the full `generate` call;
+  * CUDA memory high-water marks;
+  * the generated token ids, compared with the paired baseline's to record whether the sequence is
+    identical.
 
 Two `transformers` 5.3.0 behaviours would each have silently corrupted the comparison, so both are
 pinned in `src/tinyturbo/methods.py` and recorded per trial:
@@ -97,35 +101,44 @@ pinned in `src/tinyturbo/methods.py` and recorded per trial:
 
 ## Findings
 
-**Measured end to end (the benchmark, 180 trials).** Assisted greedy lost at every configuration, about
-1.9× pooled, the loss shrinking as generations lengthened (0.452 → 0.528 → 0.592), and all 90 assisted
-trials matched their baseline token for token. Accepted length orders the results: 3.56 → 4.66 → 5.17
-tokens per target forward pass.
+**Measured end to end (the benchmark, 180 trials).**
 
-**Measured in isolation (Stage 0 calibration, same card).** `tinyturbo calibrate` times three primitives
-in isolation — one target pass over a single token, one over γ+1 = 6 tokens, one assistant pass — with
-warm-ups discarded and 20 timed samples each, measuring the two terms of the cost model
-`speedup ≈ b / (ρ + κ)` (`docs/FINDINGS.md` §5) rather than assuming them. A 135M draft pass costs
-**1.572×** a 1.7B target pass — the same 1.57–1.61× the sweep's own pass counts implied, from a
-procedure sharing no inputs with it. On this T4: ρ = 1.147, κ = 7.858. With both terms measured, the
-model **predicts** 0.395 / 0.517 / 0.574 against **observed** 0.452 / 0.528 / 0.592: residuals of
-+0.058 / +0.010 / +0.018, each inside the trial spread at its own length. The cost is in drafting, not
-verification — the verification premium is 1.6 % of a modelled iteration.
+* Assisted greedy lost at every configuration, about **1.9× pooled**.
+* The loss shrank as generations lengthened: **0.452 → 0.528 → 0.592**.
+* All 90 assisted trials matched their baseline token for token.
+* Accepted length orders the results: **3.56 → 4.66 → 5.17** tokens per target forward pass.
+
+**Measured in isolation (Stage 0 calibration, same card).** `tinyturbo calibrate` times three primitives —
+one target pass over a single token, one over γ+1 = 6 tokens, one assistant pass — with warm-ups
+discarded and 20 timed samples each, measuring both terms of the cost model `speedup ≈ b / (ρ + κ)`
+(`docs/FINDINGS.md` §5) rather than assuming them.
+
+* A 135M draft pass costs **1.572×** a 1.7B target pass — matching the 1.57–1.61× the sweep's own pass
+  counts implied, from a procedure sharing no inputs with it.
+* On this T4: **ρ = 1.147, κ = 7.858**.
+* With both terms measured, the model **predicts** 0.395 / 0.517 / 0.574 against **observed**
+  0.452 / 0.528 / 0.592.
+* Residuals of **+0.058 / +0.010 / +0.018**, each inside the trial spread at its own length.
+* The cost is in drafting, not verification — the verification premium is 1.6 % of a modelled iteration.
 
 **Bounded profiler observation, and an unresolved discrepancy.** `tinyturbo profile` traces the two
 models' labelled forward passes with `--trace-active 8` — a window of 8 target passes per arm, since the
-whole-generation trace never fit on a free-tier instance. It was meant to attribute per-step cost, but
-its per-pass means came out **1.6–2.0×** the calibration's isolated primitives, a roughly constant
-≈20 ms added per labelled pass, which is also what compresses the draft/target ratio from 1.572 to
-1.29–1.32. Two explanations fit and this dataset cannot separate them: profiler overhead inside the
-recording window, and a different runtime image (the trace ran driver 580.178.04 / CUDA 12.8 /
-torch 2.11.0+cu128 on Kaggle; the sweep and calibration ran 580.82.07 / CUDA 13.0 / torch 2.11.0+cu130
-on Colab). **It is a discrepancy, not a decomposition** — `attributed_ms` and `unattributed_ms` are
-`null`. Re-running the same command on the calibration's image would settle it (`docs/FINDINGS.md` §9).
+whole-generation trace never fit on a free-tier instance. It was meant to attribute per-step cost, but:
 
-**Modelled, not validated, and still open.** The cost model is scored by the data rather than fitted to
-it; prompt-lookup, the adaptive schedules and ensemble verification were never run, and neither was an
-sm80+ comparison.
+* Per-pass means came out **1.6–2.0×** the calibration's isolated primitives — a roughly constant
+  ≈20 ms added per labelled pass.
+* That is also what compresses the draft/target ratio from **1.572 to 1.29–1.32**.
+* Two explanations fit and this dataset cannot separate them:
+  * profiler overhead inside the recording window;
+  * a different runtime image — the trace ran driver 580.178.04 / CUDA 12.8 / torch 2.11.0+cu128 on
+    Kaggle; the sweep and calibration ran 580.82.07 / CUDA 13.0 / torch 2.11.0+cu130 on Colab.
+* **It is a discrepancy, not a decomposition** — `attributed_ms` and `unattributed_ms` are `null`.
+* Re-running the same command on the calibration's image would settle it (`docs/FINDINGS.md` §9).
+
+**Modelled, not validated, and still open.** The cost model is scored by the data rather than fitted to it.
+
+* Prompt-lookup, the adaptive schedules and ensemble verification were never run.
+* An sm80+ comparison was never run either.
 
 ## Figures
 
@@ -177,10 +190,12 @@ same configuration produces numbers that look like results and are not.
 python -m tinyturbo run --config configs/gpu_main.yaml      # ~24 min on a T4, plus ~6.8 GB of weights
 ```
 
-`run` resumes rather than repeats, skipping a trial whose `(prompt, length, method, trial)` key is
-already recorded, and refuses to append records from a different GPU or driver rather than pooling two
-machines into one average. `--force` re-measures; `--trials 1` gives a ~15-minute pass. Then `verify`
-and `report` as above.
+* `run` resumes rather than repeats, skipping a trial whose `(prompt, length, method, trial)` key is
+  already recorded.
+* It refuses to append records from a different GPU or driver, rather than pooling two machines into one
+  average.
+* `--force` re-measures; `--trials 1` gives a ~15-minute pass.
+* Then `verify` and `report` as above.
 
 **CPU smoke test — plumbing only.** `python -m tinyturbo run --config configs/slice_cpu.yaml` (and the
 matching `report`) exercises the same code path on a real checkpoint with no GPU, tagged as a smoke run
