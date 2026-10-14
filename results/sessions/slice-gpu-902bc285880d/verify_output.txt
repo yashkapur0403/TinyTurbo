@@ -1,0 +1,6 @@
+raw records : /content/TinyTurbo/results/raw/slice-gpu-902bc285880d.jsonl
+run id      : slice-gpu-902bc285880d
+measured    : 4 trial records
+methods     : assisted, baseline
+hardware    : Tesla T4 / float16
+OK: records are complete and the forward-pass instrumentation worked.

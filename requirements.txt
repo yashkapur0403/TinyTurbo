@@ -1,0 +1,31 @@
+# TinyTurbo dependencies, pinned to the versions verified on 2026-10-14.
+#
+# PyTorch is intentionally NOT pinned in this file. The correct wheel depends on the
+# platform (CPU-only locally, CUDA in Colab/Kaggle), and a careless `pip install` of a
+# CPU wheel onto a GPU box silently disables CUDA. Install torch FIRST, then this file:
+#
+#   CPU (local development):
+#     python -m pip install torch==2.10.0
+#   CUDA (Colab / Kaggle - use the index URL that matches the image):
+#     python -m pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cu124
+#
+#   then:
+#     python -m pip install -r requirements.txt --no-deps
+#
+# Verified locally with: Python 3.14.6, torch 2.10.0+cpu, Windows.
+
+transformers==5.3.0
+numpy==2.4.2
+pandas==2.3.3
+matplotlib==3.10.8
+PyYAML==6.0.3
+pytest==9.0.2
+
+# ---------------------------------------------------------------------------
+# Not installed, and not needed for the vertical slice:
+#
+#   accelerate   only required if you load models with device_map="auto".
+#                We use .to(device) instead, which needs nothing extra.
+#   nvidia-ml-py / pynvml   for detailed GPU telemetry (clocks, temperature).
+#                The slice uses torch.cuda memory counters, which are built in.
+# ---------------------------------------------------------------------------

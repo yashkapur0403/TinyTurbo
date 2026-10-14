@@ -1,0 +1,52 @@
+# Stage 4 smoke configuration: exercise `tinyturbo profile` locally, with no GPU.
+#
+#   python -m tinyturbo profile --config configs/profile_smoke.yaml --trace-active 4
+#
+# The bounded-trace route (`--trace-active`) is the one to use here, and it is what this file
+# exists for: the whole-generation trace of the real pair is what a free T4 Colab session
+# could not fit in memory (docs/FINDINGS.md §7), while a window of the decode loop runs
+# anywhere. Stage 4 is the only stage that still needs a GPU to produce a *number*; this
+# configuration answers a different question, whether the path runs end to end and writes a
+# well-formed artifact that says what it covers.
+#
+# It is NOT the benchmark and NOT a measurement of the drafting loop:
+#   * the target and the assistant are the same checkpoint, so the draft pass is exactly as
+#     expensive as the target pass and the target/draft attribution has no size asymmetry in
+#     it - the two labels still separate cleanly, which is the thing being checked;
+#   * it runs on CPU, where the trace clock is host time and there is no kernel time at all
+#     (`--trace-active` on a CPU trace reports the `cpu` clock, and says so);
+#   * it covers one case at 32 tokens, not the two cases of the default protocol.
+#
+# The artifact records all of that: `smoke: true`, the window it recorded, and
+# `covers_whole_generation: false` with no residual. Do not quote its milliseconds as a
+# result about assisted decoding - the CPU smoke run in results/raw/ has the same status.
+
+name: profile-smoke
+smoke: true
+
+models:
+  target: HuggingFaceTB/SmolLM-135M
+  assistant: HuggingFaceTB/SmolLM-135M
+  dtype: float32          # float16/bfloat16 on CPU is emulated and misleadingly slow
+  attn_implementation: eager
+
+device: auto
+
+# Read for the models, dtype, attention backend and lookahead; `profile` traces its own two
+# cases (32 and 256 tokens), so `--max-new-tokens` selects one of those rather than this.
+prompt_id: s1-01-short-open
+
+methods:
+  - baseline
+  - assisted
+
+max_new_tokens: 32
+num_assistant_tokens: 4
+warmup_trials: 1
+measured_trials: 1
+seed: 0
+
+prompts_file: configs/prompts.jsonl
+raw_dir: results/raw
+results_csv: results/benchmark_results.csv
+plots_dir: plots

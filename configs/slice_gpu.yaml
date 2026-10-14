@@ -1,0 +1,47 @@
+# Vertical-slice configuration for the real model pair.
+#
+# RUN ONCE, on 2026-10-14, as slice-gpu-902bc285880d: one prompt, two measured trials per
+# arm (the --trials 2 override below the configured 5). It is the small end-to-end check
+# that a Colab session can lean on; the ten-prompt Stage 1 sweep is configs/gpu_main.yaml.
+# See results/sessions/slice-gpu-902bc285880d/README.md.
+#
+# It still requires a CUDA GPU and must be executed in Colab or Kaggle; the local
+# development machine has no NVIDIA device. Do not report a number from a fresh run until
+# it has produced records in results/raw/ and `verify` has exited 0 on them.
+#
+#   python -m tinyturbo run --config configs/slice_gpu.yaml --trials 2
+#   python -m tinyturbo report --config configs/slice_gpu.yaml
+#
+# Hardware expectations encoded here:
+#   * Tesla T4 (Colab free) is compute capability 7.5: float16 works, bfloat16 is
+#     slow, and FlashAttention-2 is unavailable, so attention must be sdpa.
+#   * On sm80+ (A100/4090) switch dtype to bfloat16 and attention to
+#     flash_attention_2; hardware_fingerprint() records whichever was used.
+
+name: slice-gpu
+smoke: false
+
+models:
+  target: HuggingFaceTB/SmolLM-1.7B
+  assistant: HuggingFaceTB/SmolLM-135M
+  dtype: float16
+  attn_implementation: sdpa
+
+device: auto
+
+prompt_id: s2-01-long-open
+
+methods:
+  - baseline
+  - assisted
+
+max_new_tokens: 64
+num_assistant_tokens: 5
+warmup_trials: 2
+measured_trials: 5
+seed: 0
+
+prompts_file: configs/prompts.jsonl
+raw_dir: results/raw
+results_csv: results/benchmark_results.csv
+plots_dir: plots

@@ -1,0 +1,80 @@
+{
+  "run_id": "gpu-main-9e26c12945e6",
+  "created_utc": "2026-10-14T14:24:50+00:00",
+  "hardware": {
+    "python": "3.13.15",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "torch": "2.11.0+cu130",
+    "torch_build": "cuda",
+    "transformers": "5.3.0",
+    "device": "cuda",
+    "is_cuda": true,
+    "gpu_count": 1,
+    "gpu_name": "Tesla T4",
+    "gpu_compute_capability": [
+      7,
+      5
+    ],
+    "gpu_memory_total_mb": 14912.6875,
+    "gpu_driver_version": "580.82.07",
+    "nvidia_smi_report": "580.82.07, Tesla T4, 15360",
+    "cuda_version": "13.0",
+    "cudnn_version": 92700,
+    "cpu_count": 2,
+    "torch_threads": 1
+  },
+  "resolved": {
+    "device": "cuda",
+    "dtype": "float16",
+    "attn_implementation": "sdpa"
+  },
+  "model_facts": {
+    "target_parameters": 1711376384,
+    "assistant_parameters": 134515008,
+    "parameter_ratio": 0.07860048161094643,
+    "target_vocab_size": 49152,
+    "assistant_vocab_size": 49152,
+    "target_dtype_loaded": "float16",
+    "assistant_dtype_loaded": "float16"
+  },
+  "assistant_controls": {
+    "num_assistant_tokens": 5,
+    "num_assistant_tokens_schedule": "constant",
+    "assistant_confidence_threshold": 0.0,
+    "applied_to": "assistant.generation_config"
+  },
+  "run_scope": {
+    "prompt_ids": [
+      "s1-01-short-open",
+      "s1-02-short-open",
+      "s1-03-short-open",
+      "s2-01-long-open",
+      "s2-02-long-open",
+      "s2-03-long-open",
+      "s3-01-grounded",
+      "s3-02-grounded",
+      "s4-01-repetitive",
+      "s4-02-repetitive"
+    ],
+    "max_new_tokens": [
+      32,
+      128,
+      256
+    ],
+    "methods": [
+      "baseline",
+      "assisted"
+    ],
+    "warmup_trials": 2,
+    "measured_trials": 3,
+    "is_slice": false,
+    "note": "sweep: 10 prompt(s) x 3 generation length(s) = 30 points, 2 method(s)"
+  },
+  "git": {
+    "git_available": false,
+    "git_commit": null,
+    "git_dirty": null
+  },
+  "command": "/content/TinyTurbo/src/tinyturbo/__main__.py run --config configs/gpu_main.yaml"
+}

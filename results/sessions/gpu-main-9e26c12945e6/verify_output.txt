@@ -1,0 +1,7 @@
+raw records : /content/TinyTurbo/results/raw/gpu-main-9e26c12945e6.jsonl
+run id      : gpu-main-9e26c12945e6
+measured    : 180 trial records
+methods     : assisted, baseline
+hardware    : Tesla T4 / float16
+scope       : 10 prompt(s) x 3 length(s) = 30 points
+OK: records are complete and the forward-pass instrumentation worked.

@@ -1,0 +1,22 @@
+# Text files are stored and checked out with LF everywhere.
+#
+# This is not cosmetic. The raw records in results/raw/, the aggregate CSV and the
+# calibrations are evidence: their sha256 values are quoted in results/README.md and in
+# docs/FINDINGS.md, and they are compared against the byte counts `report` regenerates.
+# Git's default autocrlf behaviour on Windows would hand a cloner CRLF copies of them,
+# which would look like tampering. Forcing LF keeps a clone byte-identical to the machine
+# the runs happened on.
+* text=auto eol=lf
+
+# Binary formats are never touched by line-ending conversion.
+*.png binary
+*.zip binary
+*.ipynb binary
+
+# Three files were written on Windows and their CRLF line endings are part of the exact
+# bytes whose length and sha256 are quoted in results/README.md and docs/FINDINGS.md.
+# They are pinned to CRLF so a clone on any platform reproduces them byte-for-byte rather
+# than silently rewriting them.
+results/benchmark_results.csv text eol=crlf
+results/profiling/profile-smoke-cab8be82e4cd-profiling.json text eol=crlf
+results/raw/slice-cpu-smoke-8b0f61630f43.jsonl text eol=crlf

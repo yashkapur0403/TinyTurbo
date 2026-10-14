@@ -1,0 +1,209 @@
+{
+  "record_type": "profiling",
+  "stage": "stage4",
+  "created_utc": "2026-10-14T20:06:13+00:00",
+  "run_id": "gpu-main-9e26c12945e6",
+  "config_fingerprint": "9e26c12945e6aef30681b1833dc39163f0c856922b7040202a46e1e2e4a89818",
+  "smoke": false,
+  "hardware": {
+    "python": "3.13.15",
+    "platform": "Linux-6.18.48+-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "torch": "2.11.0+cu128",
+    "torch_build": "cuda",
+    "transformers": "5.3.0",
+    "device": "cuda",
+    "is_cuda": true,
+    "gpu_count": 2,
+    "gpu_name": "Tesla T4",
+    "gpu_compute_capability": [
+      7,
+      5
+    ],
+    "gpu_memory_total_mb": 14911.6875,
+    "gpu_driver_version": "580.178.04",
+    "nvidia_smi_report": "580.178.04, Tesla T4, 15360",
+    "cuda_version": "12.8",
+    "cudnn_version": 91900,
+    "cpu_count": 4,
+    "torch_threads": 2
+  },
+  "resolved": {
+    "device": "cuda",
+    "dtype": "float16",
+    "attn_implementation": "sdpa"
+  },
+  "settings": {
+    "warmup_runs": 1,
+    "methods": [
+      "baseline",
+      "assisted"
+    ],
+    "activities": [
+      "ProfilerActivity.CPU",
+      "ProfilerActivity.CUDA"
+    ],
+    "trace_window": {
+      "active": 8,
+      "wait": 1,
+      "warmup": 1,
+      "repeat": 1,
+      "step": "one step per target forward pass"
+    },
+    "covers_whole_generation": false
+  },
+  "cases": [
+    {
+      "case": {
+        "prompt_id": "s1-01-short-open",
+        "max_new_tokens": 32,
+        "rationale": "shortest generation length in the sweep: fixed per-step overhead is the largest share of the run here"
+      },
+      "prompt_tokens": 8,
+      "methods": {
+        "baseline": {
+          "e2e_ms": 1359.269368999776,
+          "tokens_generated": 32,
+          "clock": "device",
+          "labels": {
+            "tinyturbo:target_forward": {
+              "count": 8,
+              "self_device_ms": 316.80931200000003,
+              "self_cpu_ms": 0.0
+            },
+            "tinyturbo:generate": {
+              "count": null,
+              "self_device_ms": 0.0,
+              "self_cpu_ms": 0.0
+            },
+            "tinyturbo:assistant_forward": {
+              "count": 0,
+              "self_device_ms": 0.0,
+              "self_cpu_ms": 0.0
+            }
+          },
+          "means_from_trace": {
+            "target_forward_ms": 39.601164000000004,
+            "assistant_forward_ms": null
+          },
+          "steps_recorded": 8,
+          "covers_whole_generation": false,
+          "whole_run_annotation_measurable": false,
+          "attributed_ms": null,
+          "attributed_device_ms": null,
+          "attributed_cpu_ms": null,
+          "unattributed_ms": null
+        },
+        "assisted": {
+          "e2e_ms": 2782.976835000227,
+          "tokens_generated": 32,
+          "clock": "device",
+          "labels": {
+            "tinyturbo:assistant_forward": {
+              "count": 9,
+              "self_device_ms": 518.7382230000001,
+              "self_cpu_ms": 0.0
+            },
+            "tinyturbo:target_forward": {
+              "count": 8,
+              "self_device_ms": 356.2212119999999,
+              "self_cpu_ms": 0.0
+            },
+            "tinyturbo:generate": {
+              "count": null,
+              "self_device_ms": 0.0,
+              "self_cpu_ms": 0.0
+            }
+          },
+          "means_from_trace": {
+            "target_forward_ms": 44.52765149999999,
+            "assistant_forward_ms": 57.63758033333334
+          },
+          "steps_recorded": 8,
+          "covers_whole_generation": false,
+          "whole_run_annotation_measurable": false,
+          "attributed_ms": null,
+          "attributed_device_ms": null,
+          "attributed_cpu_ms": null,
+          "unattributed_ms": null
+        }
+      }
+    },
+    {
+      "case": {
+        "prompt_id": "s2-01-long-open",
+        "max_new_tokens": 256,
+        "rationale": "longest generation length in the sweep: the decode loop dominates, so the attribution is least sensitive to start-up effects"
+      },
+      "prompt_tokens": 183,
+      "methods": {
+        "baseline": {
+          "e2e_ms": 7207.508122000036,
+          "tokens_generated": 256,
+          "clock": "device",
+          "labels": {
+            "tinyturbo:target_forward": {
+              "count": 8,
+              "self_device_ms": 335.283451,
+              "self_cpu_ms": 0.0
+            },
+            "tinyturbo:generate": {
+              "count": null,
+              "self_device_ms": 0.0,
+              "self_cpu_ms": 0.0
+            },
+            "tinyturbo:assistant_forward": {
+              "count": 0,
+              "self_device_ms": 0.0,
+              "self_cpu_ms": 0.0
+            }
+          },
+          "means_from_trace": {
+            "target_forward_ms": 41.910431375,
+            "assistant_forward_ms": null
+          },
+          "steps_recorded": 8,
+          "covers_whole_generation": false,
+          "whole_run_annotation_measurable": false,
+          "attributed_ms": null,
+          "attributed_device_ms": null,
+          "attributed_cpu_ms": null,
+          "unattributed_ms": null
+        },
+        "assisted": {
+          "e2e_ms": 14028.238429999874,
+          "tokens_generated": 256,
+          "clock": "device",
+          "labels": {
+            "tinyturbo:assistant_forward": {
+              "count": 10,
+              "self_device_ms": 550.6665190000002,
+              "self_cpu_ms": 0.0
+            },
+            "tinyturbo:target_forward": {
+              "count": 8,
+              "self_device_ms": 333.6987829999999,
+              "self_cpu_ms": 0.0
+            },
+            "tinyturbo:generate": {
+              "count": null,
+              "self_device_ms": 0.0,
+              "self_cpu_ms": 0.0
+            }
+          },
+          "means_from_trace": {
+            "target_forward_ms": 41.712347874999985,
+            "assistant_forward_ms": 55.066651900000025
+          },
+          "steps_recorded": 8,
+          "covers_whole_generation": false,
+          "whole_run_annotation_measurable": false,
+          "attributed_ms": null,
+          "attributed_device_ms": null,
+          "attributed_cpu_ms": null,
+          "unattributed_ms": null
+        }
+      }
+    }
+  ]
+}

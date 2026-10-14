@@ -1,0 +1,85 @@
+# Stage 1 of docs/PLAN.md: the main sweep.
+#
+# Ten prompts from the fixed set at three generation lengths, both lossless arms, on the
+# real model pair. This is the configuration behind the plan's hypotheses H4 (acceptance
+# length is the mechanism), H5 (prefill dilutes) and H6 (exactness holds everywhere).
+#
+# RUN ONCE, on 2026-10-14. The recorded run is gpu-main-9e26c12945e6: 30 points, 2 warm-up
+# plus 3 measured trials per point, one 24-minute Colab session on a Tesla T4. `verify`
+# exits 0 on it and `report` regenerates its table and figure from the raw records. The
+# numbers, the checksums and what the run does not settle are in
+# results/sessions/gpu-main-9e26c12945e6/README.md; the run-log entry is in
+# results/README.md.
+#
+# It still needs a CUDA GPU, so it runs in Colab or Kaggle; the local machine has no NVIDIA
+# device. Do not report a number from a fresh run until it has produced records in
+# results/raw/ and `verify` has exited 0 on them.
+#
+#   python -m tinyturbo run    --config configs/gpu_main.yaml                 # 24 min on a T4
+#   python -m tinyturbo run    --config configs/gpu_main.yaml --trials 1       # ~15 min pass
+#   python -m tinyturbo verify --config configs/gpu_main.yaml
+#   python -m tinyturbo report --config configs/gpu_main.yaml
+#
+# Re-running resumes rather than repeating: --trials is not part of the run's identity, and
+# a trial is skipped only when its (prompt, length, method, trial) key is already recorded.
+# With the full grid on disk, a re-run prints "wrote 0 measured trial(s)" and "skipped 300
+# trial(s) already present" (300 = 30 points x 2 methods x 5 rounds, warm-ups included) and
+# measures nothing; pass --force to re-measure instead. The recorded run went out in one pass
+# at the configured 3 trials, so there is no partial attempt to top up.
+#
+# Scope, deliberately: baseline and assisted only. prompt_lookup, the adaptive schedules
+# (heuristic, confidence_threshold) and ensemble verification are later stages with their
+# own configurations and their own knobs. Mixing them in here would confound the one
+# comparison this file exists to make, which is plain greedy against model-assisted greedy.
+#
+# Hardware expectations: Tesla T4 (Colab free) is compute capability 7.5 - float16 works,
+# bfloat16 is slow, FlashAttention-2 is unavailable, so attention must be sdpa. On sm80+
+# switch dtype to bfloat16 and attention to flash_attention_2; the hardware fingerprint
+# records whichever was actually used, and results from the two are never pooled.
+
+name: gpu-main
+smoke: false
+
+models:
+  target: HuggingFaceTB/SmolLM-1.7B
+  assistant: HuggingFaceTB/SmolLM-135M
+  dtype: float16
+  attn_implementation: sdpa
+
+device: auto
+
+# The grid. Every prompt below is run at every length below, so this file is 30 points
+# and 60 trial sets (2 warm-ups + 3 measured per point, per method).
+prompt_ids:
+  - s1-01-short-open
+  - s1-02-short-open
+  - s1-03-short-open
+  - s2-01-long-open
+  - s2-02-long-open
+  - s2-03-long-open
+  - s3-01-grounded
+  - s3-02-grounded
+  - s4-01-repetitive
+  - s4-02-repetitive
+
+max_new_tokens:
+  - 32
+  - 128
+  - 256
+
+methods:
+  - baseline
+  - assisted
+
+# Fixed lookahead for the assisted arm, as the plan specifies for Stage 1. The lookahead
+# sweep is a later stage.
+num_assistant_tokens: 5
+
+warmup_trials: 2
+measured_trials: 3
+seed: 0
+
+prompts_file: configs/prompts.jsonl
+raw_dir: results/raw
+results_csv: results/benchmark_results.csv
+plots_dir: plots

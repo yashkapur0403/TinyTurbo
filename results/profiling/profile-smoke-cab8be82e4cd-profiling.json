@@ -1,0 +1,129 @@
+{
+  "record_type": "profiling",
+  "stage": "stage4",
+  "created_utc": "2026-10-14T19:06:11+00:00",
+  "run_id": "profile-smoke-cab8be82e4cd",
+  "config_fingerprint": "cab8be82e4cd43dddd241ab9adcf7da3bff427b219316d863f0524c69eb4b002",
+  "smoke": true,
+  "hardware": {
+    "python": "3.14.6",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cpu",
+    "torch_build": "cpu",
+    "transformers": "5.3.0",
+    "device": "cpu",
+    "is_cuda": false,
+    "gpu_count": 0,
+    "gpu_name": null,
+    "gpu_compute_capability": null,
+    "gpu_memory_total_mb": null,
+    "gpu_driver_version": null,
+    "nvidia_smi_report": null,
+    "cuda_version": null,
+    "cudnn_version": null,
+    "cpu_count": 12,
+    "torch_threads": 10
+  },
+  "resolved": {
+    "device": "cpu",
+    "dtype": "float32",
+    "attn_implementation": "eager"
+  },
+  "settings": {
+    "warmup_runs": 1,
+    "methods": [
+      "baseline",
+      "assisted"
+    ],
+    "activities": [
+      "ProfilerActivity.CPU"
+    ],
+    "trace_window": {
+      "active": 4,
+      "wait": 1,
+      "warmup": 1,
+      "repeat": 1,
+      "step": "one step per target forward pass"
+    },
+    "covers_whole_generation": false
+  },
+  "cases": [
+    {
+      "case": {
+        "prompt_id": "s1-01-short-open",
+        "max_new_tokens": 32,
+        "rationale": "shortest generation length in the sweep: fixed per-step overhead is the largest share of the run here"
+      },
+      "prompt_tokens": 8,
+      "methods": {
+        "baseline": {
+          "e2e_ms": 3063.3811000734568,
+          "tokens_generated": 32,
+          "clock": "cpu",
+          "labels": {
+            "tinyturbo:target_forward": {
+              "count": 4,
+              "self_device_ms": 0.0,
+              "self_cpu_ms": 109.34296299999978
+            },
+            "tinyturbo:generate": {
+              "count": null,
+              "self_device_ms": 0.0,
+              "self_cpu_ms": 0.0
+            },
+            "tinyturbo:assistant_forward": {
+              "count": 0,
+              "self_device_ms": 0.0,
+              "self_cpu_ms": 0.0
+            }
+          },
+          "means_from_trace": {
+            "target_forward_ms": 27.335740749999946,
+            "assistant_forward_ms": null
+          },
+          "steps_recorded": 4,
+          "covers_whole_generation": false,
+          "whole_run_annotation_measurable": false,
+          "attributed_ms": null,
+          "attributed_device_ms": null,
+          "attributed_cpu_ms": null,
+          "unattributed_ms": null
+        },
+        "assisted": {
+          "e2e_ms": 4960.612199967727,
+          "tokens_generated": 32,
+          "clock": "cpu",
+          "labels": {
+            "tinyturbo:assistant_forward": {
+              "count": 4,
+              "self_device_ms": 0.0,
+              "self_cpu_ms": 182.56759499999833
+            },
+            "tinyturbo:target_forward": {
+              "count": 4,
+              "self_device_ms": 0.0,
+              "self_cpu_ms": 181.97002700000826
+            },
+            "tinyturbo:generate": {
+              "count": null,
+              "self_device_ms": 0.0,
+              "self_cpu_ms": 0.0
+            }
+          },
+          "means_from_trace": {
+            "target_forward_ms": 45.492506750002065,
+            "assistant_forward_ms": 45.641898749999584
+          },
+          "steps_recorded": 4,
+          "covers_whole_generation": false,
+          "whole_run_annotation_measurable": false,
+          "attributed_ms": null,
+          "attributed_device_ms": null,
+          "attributed_cpu_ms": null,
+          "unattributed_ms": null
+        }
+      }
+    }
+  ]
+}

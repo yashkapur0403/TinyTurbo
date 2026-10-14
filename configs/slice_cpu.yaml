@@ -1,0 +1,39 @@
+# Vertical-slice configuration for CPU development.
+#
+# This runs the real code path on a real model pair, but it is NOT the benchmark:
+# the models are too small and there is no GPU, so the numbers it produces are a
+# plumbing check, not a measurement. Every record it writes is tagged as a smoke run.
+#
+#   python -m tinyturbo run --config configs/slice_cpu.yaml
+#
+# The assistant is deliberately the same checkpoint as the target. It needs no extra
+# download, and because a model drafts its own tokens very accurately, a healthy run
+# shows a long accepted prefix, which makes instrumentation bugs obvious.
+
+name: slice-cpu-smoke
+smoke: true
+
+models:
+  target: HuggingFaceTB/SmolLM-135M
+  assistant: HuggingFaceTB/SmolLM-135M
+  dtype: float32          # float16/bfloat16 on CPU is emulated and misleadingly slow
+  attn_implementation: eager
+
+device: auto               # auto resolves to cuda when available, otherwise cpu
+
+prompt_id: s2-01-long-open  # a long prompt so the prefill/decode split is visible
+
+methods:
+  - baseline
+  - assisted
+
+max_new_tokens: 24
+num_assistant_tokens: 4    # explicit: the library default is 20
+warmup_trials: 1
+measured_trials: 2
+seed: 0
+
+prompts_file: configs/prompts.jsonl
+raw_dir: results/raw
+results_csv: results/benchmark_results.csv
+plots_dir: plots

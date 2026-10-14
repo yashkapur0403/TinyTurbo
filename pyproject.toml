@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tinyturbo"
+version = "0.1.0"
+description = "A reproducible study of assisted (speculative) decoding"
+requires-python = ">=3.10"
+# Deliberately empty: requirements.txt is the single source of truth for dependencies,
+# so that `pip install -e . --no-deps` can never pull a different torch build.
+dependencies = []
+
+[project.scripts]
+tinyturbo = "tinyturbo.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Lets pytest import the package straight from the source tree, so the tests run with
+# no installation step at all.
+pythonpath = ["src"]
+addopts = "-q"
+markers = [
+    "integration: requires network access or a GPU (deselected by default)",
+]

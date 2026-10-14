@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Python 3.14 bytecode cache
+*.pyc
+
+# Other disposable caches and tool output
+.ipynb_checkpoints/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+coverage.xml
+htmlcov/
+
+# Large binary / cache artifacts - never commit model weights
+*.safetensors
+*.bin
+*.pt
+*.ckpt
+
+# Local scratch output. NOTE: results/raw/ is intentionally NOT ignored.
+# Raw run records are the evidence behind every number in this repository, so they
+# are committed once a real run has produced them. Derived files (CSV, plots) can
+# always be regenerated from raw with `python -m tinyturbo report`.
+results/*.tmp
+results/scratch/
+*.log
+
+# The Colab/Kaggle upload bundle is a build artefact: a zip of this repository, written to
+# the project root by scripts/make_colab_bundle.py. It goes stale the moment any file is
+# edited, so it must never be committed alongside the source it duplicates.
+TinyTurbo.zip
+
+# Local environment files and anything holding a credential.
+.env
+.env.*
+*.pem

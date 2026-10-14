@@ -1,0 +1,35 @@
+# Dependencies for a GPU run on a hosted Colab or Kaggle image.
+#
+# Use this file instead of requirements.txt in a hosted notebook:
+#
+#   %pip install -q -r requirements-colab.txt
+#
+# Why it is almost empty
+# ----------------------
+# A hosted image already provides torch with CUDA, numpy, pandas, matplotlib and PyYAML,
+# all compiled against each other. Replacing any of them can require a runtime restart.
+#
+# This project imports numpy nowhere directly. Verified:
+#   grep -rn "import numpy" src/ tests/   ->   no matches
+# so numpy is only ever a transitive dependency of torch/pandas/matplotlib, and there is
+# no reason to force a version. requirements.txt pins numpy==2.4.2 because that is the
+# version verified on the local Windows CPU machine; installing that file on Colab would
+# overwrite the runtime's numpy for no benefit.
+
+# The one dependency whose version actually changes results: this is the release whose
+# assisted-generation behaviour was read out of the source and pinned in the tests.
+transformers==5.3.0
+
+# Only needed to run the project's own test suite on the remote machine. Cheap, and it
+# makes the pre-run check deterministic instead of depending on what the image ships.
+pytest==9.0.2
+
+# ---------------------------------------------------------------------------
+# Not listed on purpose:
+#
+#   torch        the image's CUDA build is the one to keep. transformers 5.3.0 requires
+#                torch>=2.4; the smoke-test preflight asserts that version and fails
+#                loudly rather than silently running on something older.
+#   accelerate   only needed for device_map="auto". This project uses .to(device).
+#   numpy        see above.
+# ---------------------------------------------------------------------------
